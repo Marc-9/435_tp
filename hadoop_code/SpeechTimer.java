@@ -1,4 +1,4 @@
-package cs435.P2;
+package cs435.TP;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -23,37 +23,37 @@ public class SpeechTimer {
 	public static class CountWords extends Mapper<Object, Text, Text, FloatWritable> {
 		@Override
 		protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			StringTokenizer itr = new StringTokenizer(value.toString());
-			while (itr.hasMoreTokens()) {
-				String s = itr.nextToken();
-				String[] elements = s.split("~~");
-				/* Parse date of podcast
-				if(!elements[0].equals("nan")){
-					DateTimeFormatter format = DateTimeFormatter.RFC_1123_DATE_TIME;
-					LocalDate date = LocalDate.parse(elements[0], format);
-				}
-				*/
-				for(int i = 1; i < elements.length; i++){
-					String[] words = elements[i].split("\\|\\|");
-					String newWord = words[0].toLowerCase().replaceAll("[^a-z]+", "");
-					float startTime = Float.valueOf(words[1]);
-					float endTime = Float.valueOf(words[2]);
-					float deltaTime = endTime - startTime;
-					Text word = new Text(newWord);
-					FloatWritable timeTook = new FloatWritable(deltaTime);
-					context.write(word, timeTook);
-				}
-				
+			String s = value.toString();
+			String[] elements = s.split("~~");
+			/* Parse date of podcast
+			if(!elements[0].equals("nan")){
+				DateTimeFormatter format = DateTimeFormatter.RFC_1123_DATE_TIME;
+				LocalDate date = LocalDate.parse(elements[0], format);
 			}
- 		}
-	}	
+			*/
+			for(int i = 1; i < elements.length; i++){
+				String[] words = elements[i].split("\\|\\|");
+				String newWord = words[0].toLowerCase().replaceAll("[^a-z]+", "");
+				if(newWord.length() == 0){
+					continue;
+				}
+				float startTime = Float.valueOf(words[1]);
+				float endTime = Float.valueOf(words[2]);
+				float deltaTime = endTime - startTime;
+				Text word = new Text(newWord);
+				FloatWritable timeTook = new FloatWritable(deltaTime);
+				context.write(word, timeTook);
+			}
+
+		}
+	}
 	public static class DeltaTime extends Reducer<Text, FloatWritable, Text, Text>{
-		
+
 		List<Word> sortedList;
 		@Override
 		protected void setup(Context context) {
 			sortedList = new ArrayList<Word>();
-	 	}
+		}
 
 		@Override
 		protected void reduce(Text key, Iterable<FloatWritable> values, Context context){
@@ -63,12 +63,12 @@ public class SpeechTimer {
 				count++;
 				totalTime += time.get();
 			}
-			if(count > 99){
-				float avgTime = totalTime / count;
-				sortedList.add(new Word(key, avgTime, count));
-			}
+			//if(count > 99){
+			float avgTime = totalTime / count;
+			sortedList.add(new Word(key, avgTime, count));
+			//}
 
-		 }
+		}
 
 		@Override
 		protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -95,10 +95,10 @@ public class SpeechTimer {
 	public static class CustomComparator implements Comparator<Word>{
 		@Override
 		public int compare(Word o1, Word o2){
-			if (o1.avgTime > o2.avgTime){
+			if (o1.count > o2.count){
 				return -1;
 			}
-			else if(o1.avgTime < o2.avgTime){
+			else if(o1.count < o2.count){
 				return 1;
 			}
 			else{
@@ -120,7 +120,7 @@ public class SpeechTimer {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
 		FileInputFormat.addInputPath(job, new Path(args[1]));
-		FileOutputFormat.setOutputPath(job, new Path(args[2])); 
+		FileOutputFormat.setOutputPath(job, new Path(args[2]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }

@@ -19,31 +19,13 @@ import java.util.Arrays;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class WordOverTime {
-    public static class WordAndDate extends Mapper<Object, Text, Text, IntWritable> {
+public class MergeOutputs {
+    public static class MergeMapper extends Mapper<Object, Text, Text, IntWritable> {
         @Override
         protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String s = value.toString();
-            String[] elements = s.split("~~");
-            if(!elements[0].equals("nan")){
-                DateTimeFormatter format = DateTimeFormatter.RFC_1123_DATE_TIME;
-                try{
-                    LocalDate date = LocalDate.parse(elements[0], format);
-                    for(int i = 1; i < elements.length; i++){
-                        String[] words = elements[i].split("\\|\\|");
-                        String newWord = words[0].toLowerCase().replaceAll("[^a-z]+", "");
-                        if(newWord.length() == 0){
-                            continue;
-                        }
-
-                        Text word = new Text(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))+"-"+newWord);
-                        context.write(word,new IntWritable(1));
-                    }
-                }
-                catch(Exception e){
-
-                }
-            }
+            String[] elements = s.split("	");
+            context.write(new Text(elements[0]), new IntWritable(Integer.valueOf(elements[1])));
         }
     }
     public static class SumCounts extends Reducer<Text, IntWritable, Text, IntWritable>{
@@ -52,7 +34,7 @@ public class WordOverTime {
         protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException{
             int count = 0;
             for(IntWritable val : values){
-                count++;
+                count += val.get();
             }
             context.write(key, new IntWritable(count));
 
@@ -66,11 +48,11 @@ public class WordOverTime {
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "Word Over Time");
-        job.setJarByClass(WordOverTime.class);
-        job.setMapperClass(WordOverTime.WordAndDate.class);
-        job.setReducerClass(WordOverTime.SumCounts.class);
-        //job.setNumReduceTasks(1);
+        Job job = Job.getInstance(conf, "Merge Output");
+        job.setJarByClass(MergeOutputs.class);
+        job.setMapperClass(MergeOutputs.MergeMapper.class);
+        job.setReducerClass(MergeOutputs.SumCounts.class);
+        job.setNumReduceTasks(1);
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(IntWritable.class);
         job.setOutputKeyClass(Text.class);

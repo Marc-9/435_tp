@@ -1,0 +1,6 @@
+WordLengths- Unique words (sorted by number of occurrences)
+	Format- word \t avg \t time (seconds), # of occurrences
+WordsOverTime- How many time each word was said on a certain day
+	Format- date-word \t # of occurrences
+WordsPercentage- How often each word was said at a percentage of the podcast
+	Format- percentage of podcast completed-word \t # of occurrences

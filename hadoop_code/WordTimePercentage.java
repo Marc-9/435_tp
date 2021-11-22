@@ -33,7 +33,10 @@ public class WordTimePercentage {
                 if(newWord.length() == 0){
                     continue;
                 }
-                double timeSaid = Math.ceil((Float.parseFloat(words[1]) / podcast_length * 100f)) + 1;
+                double timeSaid = Math.ceil((Float.parseFloat(words[1]) / podcast_length * 100f));
+                if(timeSaid == 0){
+                    timeSaid++;
+                }
                 Text word = new Text(Double.toString(timeSaid)+"-"+newWord);
                 context.write(word,new IntWritable(1));
             }

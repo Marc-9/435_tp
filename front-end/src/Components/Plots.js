@@ -16,7 +16,7 @@ function Plots() {
                     },
                     {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]},
                 ]}
-                layout={ {width: 320, height: 240, title: 'Practice Plot'} }
+                layout={ {width: 800, height: 500, title: 'Practice Plot'} }
             />
         </div>
     );

@@ -1,16 +1,19 @@
-import './Header.css';
+import React from 'react';
+import { Container, Navbar } from 'react-bootstrap';
+import { FaStop, FaStopwatch } from 'react-icons/fa';
 
-function Header() {
+function Header(props) {
+
     return (
-        <>
-            <div className="header">
-                <div className="header-container">
-                    <div className="header-logo">
-                        Speech Timer <i className="fas fa-stopwatch"></i>
-                    </div>
-                </div>
-            </div>
-        </>
+        <Navbar collapseOnSelect variant="dark" bg="dark" expand="lg">
+            <Container fluid>
+                <Navbar.Text><FaStopwatch size="30px" style={{color: 'white'}}/></Navbar.Text>
+                <Navbar.Brand variant="secondary">
+                    {props.title}
+                </Navbar.Brand>
+                <Navbar.Text><FaStopwatch size="30px" style={{color: 'white'}}/></Navbar.Text>
+            </Container>
+        </Navbar>
     )
 }
 

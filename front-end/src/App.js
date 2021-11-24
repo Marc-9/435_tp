@@ -1,9 +1,12 @@
 import './App.css';
 import React, { useState } from 'react';
 import Header from './Components/Header';
-import Body from './Components/Body';
-import CountLength from './Components/CountLength';
-import Plots from './Components/Plots';
+import Footer from './Components/Footer';
+import Home from './Components/Home';
+// import CountLength from './Components/CountLength';
+// import Plots from './Components/Plots';
+import 'bootstrap/dist/css/bootstrap.min.css';
+// eslint-disable-next-line
 
 function App() {
 
@@ -14,10 +17,17 @@ function App() {
 
   return (
     <>
-      <Header />
-      <Body wordCount={wordCount} setWordCount={setWordCount}/>
-      <CountLength wordCount={wordCount} speechLength={speechLength} />
-      <Plots />
+      <Header
+        title="Speech Timer"
+        about="About Us"
+      />
+      <Home
+        wordCount={wordCount}
+        setWordCount={setWordCount}
+        speechLength={speechLength}
+        setSpeechLength={setSpeechLength}
+      />
+      <Footer />
     </>
   );
 }

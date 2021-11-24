@@ -20,43 +20,42 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.lang.Math;
 
-public class TimeVariancePerWord {
-	public static class VarianceReducer extends Reducer<Text, FloatWritable, Text, Text>{
-
+public class CountSpecialCharsTime {
+    public static class CharsMapper extends Mapper<Object, Text, Text, FloatWritable> {
 		@Override
-		protected void reduce(Text key, Iterable<FloatWritable> values, Context context) throws IOException, InterruptedException {
-			//variance is calculated as s^2 = sum(math.pow(x-mean, 2))/n
-			ArrayList<Float> times = new ArrayList<>(); 
+		protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+			String s = value.toString();
+			String[] elements = s.split("~~");
 
-			int count = 0;
-			float totalTime = 0;
-			for(FloatWritable time : values){
-				count++;
-				totalTime += time.get();
-				times.add(time.get());
+            boolean lastWordSpecial = false;
+            float lastWordSpecialTime = 0;
+			for(int i = 1; i < elements.length; i++){
+				String[] words = elements[i].split("\\|\\|");
+				boolean charInWord = words[0].toLowerCase().contains(".");
+                float startTime = Float.valueOf(words[1]);
+                float endTime = Float.valueOf(words[2]);
+                
+                if(charInWord){
+                    lastWordSpecial = true;
+                    lastWordSpecialTime = endTime;
+                }
+                
+				Text word = new Text(newWord);
+				FloatWritable timeTook = new FloatWritable(startTime - lastWordSpecialTime);
+
+				context.write(word, timeTook);
 			}
-
-			float mean = totalTime / count;
-
-			float var = 0;
-			for(Float time : times){
-				float diff = time-mean;
-				var += Math.pow(diff, 2);
-			}
-			var = var / count;
-			context.write(key, new Text(mean + ""));
 
 		}
-
 	}
 
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		Job job = Job.getInstance(conf, "Variance in Time Per Word");
-		job.setJarByClass(TimeVariancePerWord.class);
-		job.setMapperClass(SpeechTimer.CountWords.class);
-		job.setReducerClass(TimeVariancePerWord.VarianceReducer.class);
+		Job job = Job.getInstance(conf, "Count Time Between '.,' and next word");
+		job.setJarByClass(CountSpecialCharsTime.class);
+		job.setMapperClass(CountSpecialCharsTime.CharsMapper.class);
+		job.setReducerClass(SpeechTimer.DeltaTime.class);
 		job.setNumReduceTasks(1);
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(FloatWritable.class);

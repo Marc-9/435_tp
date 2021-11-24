@@ -26,5 +26,5 @@ yarn-error.log*
 package-lock.json
 
 # java
-Makefile
 *.class
+*.jar

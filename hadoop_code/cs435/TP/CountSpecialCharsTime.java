@@ -37,7 +37,6 @@ public class CountSpecialCharsTime {
 				boolean charInWord = word.endsWith(".") || word.endsWith(",");
                 float startTime = Float.valueOf(words[1]);
                 float endTime = Float.valueOf(words[2]);
-                
                 if(charInWord){
                     lastWordSpecial = true;
                     lastWordSpecialTime = endTime;

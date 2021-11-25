@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.lang.Math;
 
-public class CountSpecialCharsTime {
+public class CountPunctuation {
     public static class CharsMapper extends Mapper<Object, Text, Text, FloatWritable> {
 		@Override
 		protected void map(Object key, Text value, Context context) throws IOException, InterruptedException {
@@ -53,8 +53,8 @@ public class CountSpecialCharsTime {
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		Job job = Job.getInstance(conf, "Count Time Between '.,' and next word");
-		job.setJarByClass(CountSpecialCharsTime.class);
-		job.setMapperClass(CountSpecialCharsTime.CharsMapper.class);
+		job.setJarByClass(CountPunctuation.class);
+		job.setMapperClass(CountPunctuation.CharsMapper.class);
 		job.setReducerClass(SpeechTimer.DeltaTime.class);
 		job.setNumReduceTasks(1);
 		job.setMapOutputKeyClass(Text.class);

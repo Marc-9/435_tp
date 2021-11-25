@@ -42,7 +42,9 @@ public class CountPunctuation {
 					String[] nextWords = elements[i+1].split("\\|\\|");
 					float nextStartTime = Float.valueOf(nextWords[1]);
 					float deltaTime = nextStartTime - endTime;
-					context.write(new Text(punctuation), new FloatWritable(deltaTime));
+					if(deltaTime > 0){
+						context.write(new Text(punctuation), new FloatWritable(deltaTime));
+					}	
                 }
 			}
 

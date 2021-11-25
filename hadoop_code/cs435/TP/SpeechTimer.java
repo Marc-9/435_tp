@@ -49,12 +49,6 @@ public class SpeechTimer {
 	}
 	public static class DeltaTime extends Reducer<Text, FloatWritable, Text, Text>{
 
-		List<Word> sortedList;
-		@Override
-		protected void setup(Context context) {
-			sortedList = new ArrayList<Word>();
-		}
-
 		@Override
 		protected void reduce(Text key, Iterable<FloatWritable> values, Context context){
 			int count = 0;
@@ -63,50 +57,12 @@ public class SpeechTimer {
 				count++;
 				totalTime += time.get();
 			}
-			//if(count > 99){
+
 			float avgTime = totalTime / count;
-			sortedList.add(new Word(key, avgTime, count));
-			//}
-
-		}
-
-		@Override
-		protected void cleanup(Context context) throws IOException, InterruptedException {
-			Collections.sort(sortedList, new CustomComparator());
-			for(int i = 0; i < sortedList.size(); i++) {
-				context.write(new Text(sortedList.get(i).key), new Text(sortedList.get(i).avgTime + "\t" + sortedList.get(i).count));
-			}
+			context.wrtie(new Text(key), new FloatWritable(avgTime));
 		}
 
 	}
-
-	public static class Word{
-		String key;
-		float avgTime;
-		int count;
-
-		Word(Text key, float time, int count){
-			this.key = key.toString();
-			this.avgTime = time;
-			this.count = count;
-		}
-	}
-
-	public static class CustomComparator implements Comparator<Word>{
-		@Override
-		public int compare(Word o1, Word o2){
-			if (o1.count > o2.count){
-				return -1;
-			}
-			else if(o1.count < o2.count){
-				return 1;
-			}
-			else{
-				return o1.key.compareTo(o2.key);
-			}
-		}
-	}
-
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();

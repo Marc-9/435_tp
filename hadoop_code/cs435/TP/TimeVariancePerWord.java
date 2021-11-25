@@ -44,7 +44,12 @@ public class TimeVariancePerWord {
 				var += Math.pow(diff, 2);
 			}
 			var = var / count;
-			context.write(key, new Text(mean + ""));
+
+			// String data = "";
+			// for(Float time : times){
+			// 	data += time + " ";
+			// }
+			context.write(key, new Text(var + ""));
 
 		}
 

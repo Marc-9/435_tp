@@ -17,7 +17,7 @@ runVariance:
 	$(HADOOP_RUN) cs435.TP.TimeVariancePerWord $(INPUT_NAME) /varTest
 
 runPunctuation:
-	$(HADOOP_RUN) cs435.TP.CountSpecialCharsTime $(INPUT_NAME) /puncTest
+	$(HADOOP_RUN) cs435.TP.CountPunctuation $(INPUT_NAME) /puncTest
 
 jar:
 	jar cf code.jar cs435

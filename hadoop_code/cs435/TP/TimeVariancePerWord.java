@@ -26,7 +26,7 @@ public class TimeVariancePerWord {
 		@Override
 		protected void reduce(Text key, Iterable<FloatWritable> values, Context context) throws IOException, InterruptedException {
 			//variance is calculated as s^2 = sum(math.pow(x-mean, 2))/n
-			ArrayList<Float> times = new ArrayList<>(); 
+			List<Float> times = new ArrayList<>(); 
 
 			int count = 0;
 			float totalTime = 0;

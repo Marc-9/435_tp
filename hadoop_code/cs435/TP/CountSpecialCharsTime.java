@@ -27,27 +27,22 @@ public class CountSpecialCharsTime {
 			String s = value.toString();
 			String[] elements = s.split("~~");
 
-            boolean lastWordSpecial = false;
-            float lastWordSpecialTime = 0;
-			String lastWord = "";
-			for(int i = 1; i < elements.length; i++){
+			for(int i = 1; i < elements.length-1; i++){
 				String[] words = elements[i].split("\\|\\|");
 				
-                String word = words[0];
-				boolean charInWord = word.endsWith(".") || word.endsWith(",");
+
                 float startTime = Float.valueOf(words[1]);
                 float endTime = Float.valueOf(words[2]);
+
+                String word = words[0];
+				boolean charInWord = word.endsWith(".") || word.endsWith(",");
                 if(charInWord){
-                    lastWordSpecial = true;
-                    lastWordSpecialTime = endTime;
-					lastWord = word;
-                }else{
-                    if(lastWordSpecial){
-                        FloatWritable timeTook = new FloatWritable(startTime - lastWordSpecialTime);
-						String punctuation = lastWord.charAt(lastWord.length() - 1) + "";
-                        context.write(new Text(punctuation), timeTook);
-                    }
-                    lastWordSpecial = false; //reset variable
+					String punctuation = word.charAt(word.length() - 1) + "";
+
+					String[] nextWords = elements[i+1].split("\\|\\|");
+					float nextStartTime = Float.valueOf(nextWords[1]);
+					float deltaTime = nextStartTime - endTime;
+					context.write(new Text(punctuation), new FloatWritable(deltaTime));
                 }
 			}
 

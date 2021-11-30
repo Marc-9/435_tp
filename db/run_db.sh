@@ -1,3 +1,5 @@
+#!/bin/bash
+
 IMAGE_NAME=speechtimerdb:latest
 
 # build image
@@ -16,3 +18,10 @@ fi
 docker run --name 435_db -d $IMAGE_NAME 
 
 docker ps
+
+# set env vars
+export PGUSER=cs435
+export PGPASSWORD=12345
+export PGPORT=5432
+export PGHOST=localhost
+# export PGDATABASE

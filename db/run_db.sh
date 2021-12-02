@@ -3,7 +3,7 @@
 IMAGE_NAME=speechtimerdb:latest
 
 # build image
-docker build --rm -t $IMAGE_NAME .
+docker build --no-cache --rm -t $IMAGE_NAME .
 
 # kill old run 
 docker ps -a | grep 435_db
@@ -15,13 +15,7 @@ if [ $CONTAINER_RUNNING -eq 0 ]; then
     echo "killed running container"
 fi
 # run image
-docker run --name 435_db -d $IMAGE_NAME 
+docker run --name 435_db -p 3306:3306 -d $IMAGE_NAME 
 
 docker ps
 
-# set env vars
-export PGUSER=cs435
-export PGPASSWORD=12345
-export PGPORT=5432
-export PGHOST=localhost
-# export PGDATABASE

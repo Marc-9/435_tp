@@ -51,7 +51,10 @@ app.post('/word_info', async (req, res) => {
     let id = req.body.id;
 
     let word_row = await db.execute_query(`select * from words where id = ${db.pool.escape(id)}`)
-    word_row = word_row[0];
+    if(word_row.length){
+        word_row = word_row[0];
+    }
+
     let date_occ = await db.execute_query(`select date, num_of_occurences FROM word_date WHERE word_id = ${db.pool.escape(id)}`)
     
     let perc_occ = await db.execute_query(`select percent, num_of_occurences FROM word_percent WHERE word_id = ${db.pool.escape(id)}`)
@@ -60,7 +63,7 @@ app.post('/word_info', async (req, res) => {
         'total_occurences': word_row.num_occurences_tot,
         'occurences_over_time': date_occ,
         'occurences_by_percentage': perc_occ,
-        'letiance': word_row.letiance
+        'variance': word_row.variance
     };
     res.json(response);
 })

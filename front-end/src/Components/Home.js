@@ -22,10 +22,10 @@ function Home(props) {
     const[searchTextLength, setSearchTextLength] = useState(0);
     // const[wordId, setWordId] = useState(0);
     const[totalOccurrences, setTotalOccurrences] = useState(0);
-    const[occurrencesByPercentage, setOccurrencesByPercentage] = useState([]);
     const[variance, setVariance] = useState(0);
     const[ootData, setootData] = useState(barPlaceholderData);
     const[obpData, setobpData] = useState(barPlaceholderData);
+    const[varTime, setVarTime] = useState(0);
 
     function handleOnChange(e){
         var event = e.target.value;
@@ -51,8 +51,37 @@ function Home(props) {
         return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
     }
 
+    function mapPerOverTime(occurrencesByPercentage){
+        let obpMap = [];
+
+        for(const element of occurrencesByPercentage){
+            let percentage = element.percent;
+            let occ = element.num_of_occurences;
+
+            obpMap.push([Number(percentage), occ]);
+        }
+
+        let obpLabels = [];
+        let obpData = [];
+        obpMap = obpMap.sort((a,b)=> a[0]-b[0]);
+        for(const element of obpMap){
+            obpLabels.push(element[0]);
+            obpData.push(element[1]);
+        }
+        
+        setobpData({
+            labels: obpLabels,
+            datasets: [{
+                label: "Num Occurences",
+                data: obpData,
+                fill: true,
+                backgroundColor: "DarkOliveGreen",
+            }],
+        })
+    }
+
     function mapOccOverTime(occurrencesOverTime){
-        const ootMap = new Map();
+        let ootMap = new Map();
         
         for(const element of occurrencesOverTime){
             let strDate = element.date;
@@ -69,6 +98,7 @@ function Home(props) {
         }
         let ootLabels = [];
         let ootData = [];
+        ootMap = new Map([...ootMap.entries()].sort());
         for(const element of ootMap){
             ootLabels.push(element[0]);
             ootData.push(element[1]);
@@ -100,16 +130,14 @@ function Home(props) {
         }).then(response => response.json())
         .then(data => {
             let time = sec2time(data.timeInSeconds)
+            let varTime = sec2time(data.varianceInSeconds);
+            setVarTime(varTime);
             props.setSpeechLength(time);
-          //console.log('Success:', data);
+        //   console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
         });;
-    }
-
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async function oneWordAPI(){
@@ -131,7 +159,7 @@ function Home(props) {
             //console.log(data.id);
             wordId = data.id;
             // console.log(wordId);
-            //console.log('Success:', data);
+            console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -148,10 +176,9 @@ function Home(props) {
             setSearchTextLength(data.avg_time);
             setTotalOccurrences(data.total_occurences);
             setVariance(data.variance);
-
             mapOccOverTime(data.occurences_over_time);
-            setOccurrencesByPercentage(data.occurences_by_percentage);
-            //console.log('Success:', data);
+            mapPerOverTime(data.occurences_by_percentage);
+            console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -188,7 +215,7 @@ function Home(props) {
                         <Card.Header as="h5">Speech Statistics</Card.Header>
                         <Card.Body>
                             Word Count: {props.wordCount}<br/>
-                            Speech Time: {props.speechLength}
+                            Speech Time: {props.speechLength} ± {varTime}<br/>
                         </Card.Body>
                     </Card>
                 </div>
@@ -231,7 +258,7 @@ function Home(props) {
                     <Card.Header as="h5">Occurrences By Percentage</Card.Header>
                     <Card.Body>
                         <Bar
-                            data={ootData}
+                            data={obpData}
                             options={{
                                 responsive: true
                             }}

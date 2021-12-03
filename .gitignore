@@ -33,3 +33,4 @@ package-lock.json
 
 backend/run.sh
 db/Dockerfile
+speech_timer.sql.zip

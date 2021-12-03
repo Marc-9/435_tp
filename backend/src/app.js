@@ -31,16 +31,18 @@ async function getLength(speech){
     }
     //console.log(word_time);
     let totalTime = 0;
+    let unknown_words = 0;
     for(word of speechWords){
         let curTime = word_time[word];
         if(!isNaN(curTime)){
             totalTime += curTime;
         }else{
             //TODO add time based on length of the word.
-            totalTime += 0.5;
+            unknown_words += 1;
+            totalTime += 0.1*word.length;
         }
     }
-    //console.log(totalTime);
+    console.log(`unknown words: ${unknown_words}`);
     return totalTime;
 }
 app.post('/speech_time', async (req, res) => {
@@ -80,6 +82,7 @@ app.post('/word_info', async (req, res) => {
         word_row = word_row[0];
     }else{
         word_row = {
+            'word': '',
             'num_occurences_tot': 0,
             'variance': 0
         }
@@ -90,6 +93,7 @@ app.post('/word_info', async (req, res) => {
     let perc_occ = await db.execute_query(`select percent, num_of_occurences FROM word_percent WHERE word_id = ${db.pool.escape(id)}`)
 
     let response = {
+        'word': word_row.word,
         'total_occurences': word_row.num_occurences_tot,
         'occurences_over_time': date_occ,
         'occurences_by_percentage': perc_occ,

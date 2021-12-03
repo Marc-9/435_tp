@@ -11,7 +11,8 @@ import faker from 'faker';
 
 const DELIMITERS = /\W+/;
 const SPEECH_TIME_URL = "http://localhost:3030/speech_time";
-const WORD_ID_URL = "http://localhost:3030/search_word";
+const WORD_ID_URL = "http://localhost:3030/get_id";
+// eslint-disable-next-line
 const ID_INFO_URL = "http://localhost:3030/word_info";
 
 function Home(props) {
@@ -19,6 +20,11 @@ function Home(props) {
     // eslint-disable-next-line
     const[currentText, setCurrentText] = useState("");
     const[searchText, setSearchText] = useState("");
+    // const[wordId, setWordId] = useState(0);
+    const[totalOccurrences, setTotalOccurrences] = useState(0);
+    const[occurrencesOverTime, setOccurrencesOverTime] = useState([]);
+    const[occurrencesByPercentage, setOccurrencesByPercentage] = useState([]);
+    const[variance, setVariance] = useState(0);
 
     let darkMode = {
         color: '#fff', 
@@ -39,7 +45,15 @@ function Home(props) {
         }
         props.setWordCount(validWords);
     }
-
+    function sec2time(timeInSeconds) {
+        var pad = function(num, size) { return ('000' + num).slice(size * -1); },
+        time = parseFloat(timeInSeconds).toFixed(3),
+        hours = Math.floor(time / 60 / 60),
+        minutes = Math.floor(time / 60) % 60,
+        seconds = Math.floor(time - minutes * 60);
+    
+        return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
+    }
     async function textareaAPI(){
 
         let data = {
@@ -54,7 +68,8 @@ function Home(props) {
             body: JSON.stringify(data)
         }).then(response => response.json())
         .then(data => {
-            props.setSpeechLength(data.timeInSeconds);
+            let time = sec2time(data.timeInSeconds)
+            props.setSpeechLength(time);
           console.log('Success:', data);
         })
         .catch((error) => {
@@ -62,13 +77,15 @@ function Home(props) {
         });;
     }
 
-    function oneWordAPI(){
+    async function oneWordAPI(){
+
+        let wordId = 0;
 
         let data = {
             "word": searchText
         };
 
-        fetch(WORD_ID_URL, {
+        await fetch(WORD_ID_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -76,13 +93,36 @@ function Home(props) {
             body: JSON.stringify(data)
         }).then(response => response.json())
         .then(data => {
-            // props.setSpeechLength(data.timeInSeconds);
-          console.log('Success:', data);
+            console.log(data.id);
+            wordId = data.id;
+            // console.log(wordId);
+            console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
         });;
+
+        fetch(ID_INFO_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+             },
+            body: JSON.stringify({"id": wordId})
+        }).then(response => response.json())
+        .then(data => {
+            setTotalOccurrences(data.total_occurences);
+            setVariance(data.variance);
+            setOccurrencesOverTime(data.occurences_over_time);
+            setOccurrencesByPercentage(data.occurences_by_percentage);
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });;
+        
     }
+
+    console.log(occurrencesByPercentage);
 
     return (
         <div className="main" id="main">
@@ -134,13 +174,15 @@ function Home(props) {
                                 Search
                             </Button>
                         </InputGroup>
+                        Total Occurrences: {totalOccurrences}<br/>
+                        Variance: {variance}
                         </Card.Body>
                     </Card>
                 </div>
             </div>
-            {/* <div className="d-flex justify-content-md-around justify-content-around">
+            <div className="d-flex justify-content-md-around justify-content-around">
                 <Card>
-                    <Card.Header as="h5">Average Word Length</Card.Header>
+                    <Card.Header as="h5">Occurrences Over Time</Card.Header>
                     <Card.Body>
                         <Bar
                             data={{
@@ -164,7 +206,7 @@ function Home(props) {
                         />
                     </Card.Body>
                 </Card>
-                <Card>
+                {/* <Card>
                     <Card.Header as="h5">Most Common Words</Card.Header>
                     <Card.Body>
                         <Doughnut
@@ -190,9 +232,9 @@ function Home(props) {
                             }}
                         />
                     </Card.Body>
-                </Card>
+                </Card> */}
                 <Card>
-                    <Card.Header as="h5">Average Speech Length</Card.Header>
+                    <Card.Header as="h5">Occurrences By Percentage</Card.Header>
                     <Card.Body>
                         <Scatter
                             data={{
@@ -215,7 +257,7 @@ function Home(props) {
                         />
                     </Card.Body>
                 </Card>
-            </div> */}
+            </div>
         </div>
     );
 }

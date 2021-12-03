@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container, Navbar } from 'react-bootstrap';
+// eslint-disable-next-line
 import { FaStop, FaStopwatch } from 'react-icons/fa';
 
 function Header(props) {

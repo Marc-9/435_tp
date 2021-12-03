@@ -1,5 +1,6 @@
-import React from 'react'
-import { Badge, Card } from 'react-bootstrap';
+import React, { useState } from 'react'
+// eslint-disable-next-line
+import { Badge, Card, Button, InputGroup, FormControl } from 'react-bootstrap';
 // eslint-disable-next-line
 import Chart from 'chart.js/auto';
 // eslint-disable-next-line
@@ -7,9 +8,17 @@ import { Line, Bar, Scatter, Doughnut } from 'react-chartjs-2'
 // eslint-disable-next-line
 import faker from 'faker';
 
+
 const DELIMITERS = /\W+/;
+const SPEECH_TIME_URL = "http://localhost:3030/speech_time";
+const WORD_ID_URL = "http://localhost:3030/search_word";
+const ID_INFO_URL = "http://localhost:3030/word_info";
 
 function Home(props) {
+
+    // eslint-disable-next-line
+    const[currentText, setCurrentText] = useState("");
+    const[searchText, setSearchText] = useState("");
 
     let darkMode = {
         color: '#fff', 
@@ -19,6 +28,7 @@ function Home(props) {
 
     function handleOnChange(e){
         var event = e.target.value;
+        setCurrentText(event);
         event = event.trim();
         var text = event.split(DELIMITERS);
         var validWords = 0;
@@ -28,6 +38,50 @@ function Home(props) {
             }
         }
         props.setWordCount(validWords);
+    }
+
+    async function textareaAPI(){
+
+        let data = {
+            "speech": currentText
+        };
+
+        fetch(SPEECH_TIME_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+        .then(data => {
+            props.setSpeechLength(data.timeInSeconds);
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });;
+    }
+
+    function oneWordAPI(){
+
+        let data = {
+            "word": searchText
+        };
+
+        fetch(WORD_ID_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+        .then(data => {
+            // props.setSpeechLength(data.timeInSeconds);
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });;
     }
 
     return (
@@ -49,11 +103,42 @@ function Home(props) {
                 <h1 className="text-center" style={darkMode}>Summary of the Text</h1>
                 <br/>
                 <div className="d-flex justify-content-md-around justify-content-around">
-                    <Badge bg="dark">Word Count: {props.wordCount}</Badge>
-                    <Badge bg="dark">Speech Time: {props.speechLength}</Badge>
+                    {/* <Badge bg="dark">Word Count: {props.wordCount}</Badge> */}
+                    <Button variant="dark" onClick={textareaAPI}>
+                        Calculate Speech Time
+                    </Button>
+                </div>
+                <br/>
+                <div className="d-flex justify-content-md-around justify-content-around">
+                    <Card>
+                        <Card.Header as="h5">Speech Statistics</Card.Header>
+                        <Card.Body>
+                            Word Count: {props.wordCount}<br/>
+                            Speech Time: {props.speechLength}
+                        </Card.Body>
+                    </Card>
+                </div>
+                <br/>
+                <div className="d-flex justify-content-md-around justify-content-around">
+                    <Card>
+                        <Card.Header as="h5">Find statistics for one word</Card.Header>
+                        <Card.Body>
+                        <InputGroup className="mb-3">
+                            <FormControl
+                                placeholder="type/paste word..."
+                                aria-label="Recipient's username"
+                                aria-describedby="basic-addon2"
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                            <Button variant="dark" id="button-addon2" onClick={(e) => oneWordAPI(searchText)}>
+                                Search
+                            </Button>
+                        </InputGroup>
+                        </Card.Body>
+                    </Card>
                 </div>
             </div>
-            <div className="d-flex justify-content-md-around justify-content-around">
+            {/* <div className="d-flex justify-content-md-around justify-content-around">
                 <Card>
                     <Card.Header as="h5">Average Word Length</Card.Header>
                     <Card.Body>
@@ -119,7 +204,6 @@ function Home(props) {
                                         {x: 7, y: 18},{x: 9, y: 19},{x: 10, y: 16},{x: 11, y: 21},{x: 16, y: 26},
                                         {x: 14, y: 16},{x: 7, y: 20},{x: 13, y: 24},{x: 17, y: 27},{x: 15, y: 31},
                                     ],
-                                    // fill: true,
                                     backgroundColor: "LightCoral",
                                     borderColor: "IndianRed",
                                     },
@@ -131,9 +215,15 @@ function Home(props) {
                         />
                     </Card.Body>
                 </Card>
-            </div>
+            </div> */}
         </div>
     );
 }
 
 export default Home
+
+// const run2 = () => {
+//     if(document.activeElement?.id === 'text'){
+//     console.log(document.activeElement.value.slice(document.activeElement.selectionStart, document.activeElement.selectionEnd))
+//     }
+//     }

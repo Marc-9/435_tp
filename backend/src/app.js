@@ -1,9 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const db = require('./db.js')
 
 const app = express()
 app.use(bodyParser.json()) 
+app.use(cors())
 const port = 3030
 
 app.get('/', (req, res) => {
@@ -27,7 +29,7 @@ async function getLength(speech){
         let time = row.avg_length;
         totalTime += time;
     }
-    return time;
+    return totalTime;
 }
 app.post('/speech_time', async (req, res) => {
     let speech = req.body.speech;
@@ -40,9 +42,21 @@ app.post('/speech_time', async (req, res) => {
 
 app.post('/search_word', async (req, res) => {
     let word = req.body.word;
-    let words = await db.execute_query(`SELECT id, word FROM words WHERE word LIKE "${db.pool.escape(word)}%"`);
+    let words = await db.execute_query(`SELECT id, word FROM words WHERE word LIKE ${db.pool.escape(word + '%')}`);
     let response = {
         'words': words,
+    };
+    res.json(response);
+})
+
+app.post('/get_id', async (req, res) => {
+    let word = req.body.word;
+    let words = await db.execute_query(`SELECT id, word FROM words WHERE word = ${db.pool.escape(word)}`);
+    console.log(words);
+    let id = word.length > 0 ? words[0].id : -1;
+    let response = {
+        'word': word,
+        'id': id,
     };
     res.json(response);
 })
@@ -80,5 +94,5 @@ process = app.listen(port, () => {
 
 process.on('SIGTERM', () => {
     debug('SIGTERM signal received: closing HTTP server');
-    pool.end();
+    db.pool.end();
 })

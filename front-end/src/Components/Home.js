@@ -20,16 +20,47 @@ function Home(props) {
     // eslint-disable-next-line
     const[currentText, setCurrentText] = useState("");
     const[searchText, setSearchText] = useState("");
+    const[searchTextLength, setSearchTextLength] = useState(0);
     // const[wordId, setWordId] = useState(0);
     const[totalOccurrences, setTotalOccurrences] = useState(0);
     const[occurrencesOverTime, setOccurrencesOverTime] = useState([]);
     const[occurrencesByPercentage, setOccurrencesByPercentage] = useState([]);
     const[variance, setVariance] = useState(0);
+    const[histData, setHistData] = useState({});
 
     let darkMode = {
         color: '#fff', 
         fontSize: '40px', 
         fontWeight: '400',
+    }
+
+    let barPlaceholderData = {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [
+            {
+            label: "Scatter Dataset",
+            data: [10, 13, 5, 7, 14, 25],
+            fill: true,
+            backgroundColor: "DarkOliveGreen",},{
+            label: "Second dataset",
+            data: [33, 25, 35, 51, 54, 76],
+            fill: false,
+            backgroundColor: "GoldenRod",                                    }
+        ]
+    }
+
+    let scatterPlaceholderData = {
+        datasets: [{
+            label: "Scatter Dataset",
+            data: [
+                {x: 2, y: 10}, {x: 3, y: 15},{x: 5, y: 13},{x: 13, y: 25},{x: 10, y: 22},
+                {x: 7, y: 18},{x: 9, y: 19},{x: 10, y: 16},{x: 11, y: 21},{x: 16, y: 26},
+                {x: 14, y: 16},{x: 7, y: 20},{x: 13, y: 24},{x: 17, y: 27},{x: 15, y: 31},
+            ],
+            backgroundColor: "LightCoral",
+            borderColor: "IndianRed",
+            },
+        ]
     }
 
     function handleOnChange(e){
@@ -110,6 +141,7 @@ function Home(props) {
             body: JSON.stringify({"id": wordId})
         }).then(response => response.json())
         .then(data => {
+            setSearchTextLength(data.avg_time);
             setTotalOccurrences(data.total_occurences);
             setVariance(data.variance);
             setOccurrencesOverTime(data.occurences_over_time);
@@ -119,10 +151,7 @@ function Home(props) {
         .catch((error) => {
           console.error('Error:', error);
         });;
-        
     }
-
-    console.log(occurrencesByPercentage);
 
     return (
         <div className="main" id="main">
@@ -174,6 +203,7 @@ function Home(props) {
                                 Search
                             </Button>
                         </InputGroup>
+                        Average speaking time for {searchText}: {searchTextLength} <br/>
                         Total Occurrences: {totalOccurrences}<br/>
                         Variance: {variance}
                         </Card.Body>
@@ -185,21 +215,7 @@ function Home(props) {
                     <Card.Header as="h5">Occurrences Over Time</Card.Header>
                     <Card.Body>
                         <Bar
-                            data={{
-                                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-                                datasets: [
-                                    {
-                                    label: "Scatter Dataset",
-                                    data: [10, 13, 5, 7, 14, 25],
-                                    fill: true,
-                                    backgroundColor: "DarkOliveGreen",                                    },
-                                    {
-                                    label: "Second dataset",
-                                    data: [33, 25, 35, 51, 54, 76],
-                                    fill: false,
-                                    backgroundColor: "GoldenRod",                                    }
-                                ]
-                            }}
+                            data={barPlaceholderData}
                             options={{
                                 responsive: true
                             }}
@@ -237,20 +253,7 @@ function Home(props) {
                     <Card.Header as="h5">Occurrences By Percentage</Card.Header>
                     <Card.Body>
                         <Scatter
-                            data={{
-                                datasets: [
-                                    {
-                                    label: "Scatter Dataset",
-                                    data: [
-                                        {x: 2, y: 10}, {x: 3, y: 15},{x: 5, y: 13},{x: 13, y: 25},{x: 10, y: 22},
-                                        {x: 7, y: 18},{x: 9, y: 19},{x: 10, y: 16},{x: 11, y: 21},{x: 16, y: 26},
-                                        {x: 14, y: 16},{x: 7, y: 20},{x: 13, y: 24},{x: 17, y: 27},{x: 15, y: 31},
-                                    ],
-                                    backgroundColor: "LightCoral",
-                                    borderColor: "IndianRed",
-                                    },
-                                ]
-                            }}
+                            data={scatterPlaceholderData}
                             options={{
                                 responsive: true
                             }}

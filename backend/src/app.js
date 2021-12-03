@@ -53,6 +53,11 @@ app.post('/word_info', async (req, res) => {
     let word_row = await db.execute_query(`select * from words where id = ${db.pool.escape(id)}`)
     if(word_row.length){
         word_row = word_row[0];
+    }else{
+        word_row = {
+            'num_occurences_tot': 0,
+            'variance': 0
+        }
     }
 
     let date_occ = await db.execute_query(`select date, num_of_occurences FROM word_date WHERE word_id = ${db.pool.escape(id)}`)

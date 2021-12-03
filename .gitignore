@@ -28,3 +28,8 @@ package-lock.json
 # java
 *.class
 *.jar
+
+*.sql
+
+backend/run.sh
+db/Dockerfile

@@ -33,13 +33,14 @@ async function getLength(speech){
     let totalTime = 0;
     let unknown_words = 0;
     for(word of speechWords){
-        let curTime = word_time[word];
+        let curTime = word_time[word.toLowerCase()];
         if(!isNaN(curTime)){
             totalTime += curTime;
         }else{
             //TODO add time based on length of the word.
+            console.log(word);
             unknown_words += 1;
-            totalTime += 0.1*word.length;
+            totalTime += 0.05*word.length;
         }
     }
     console.log(`unknown words: ${unknown_words}`);

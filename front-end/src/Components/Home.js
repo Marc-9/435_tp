@@ -4,9 +4,9 @@ import { Badge, Card, Button, InputGroup, FormControl } from 'react-bootstrap';
 // eslint-disable-next-line
 import Chart from 'chart.js/auto';
 // eslint-disable-next-line
-import { Line, Bar, Scatter, Doughnut } from 'react-chartjs-2'
+import { Bar } from 'react-chartjs-2'
 // eslint-disable-next-line
-import {darkMode, barPlaceholderData, scatterPlaceholderData} from '../Constants/Constants';
+import { darkMode, barPlaceholderData } from '../Constants/Constants';
 
 
 const DELIMITERS = /\W+/;
@@ -22,11 +22,10 @@ function Home(props) {
     const[searchTextLength, setSearchTextLength] = useState(0);
     // const[wordId, setWordId] = useState(0);
     const[totalOccurrences, setTotalOccurrences] = useState(0);
-    const[occurrencesOverTime, setOccurrencesOverTime] = useState([]);
     const[occurrencesByPercentage, setOccurrencesByPercentage] = useState([]);
     const[variance, setVariance] = useState(0);
-    const[histData, setHistData] = useState({});
-
+    const[ootData, setootData] = useState(barPlaceholderData);
+    const[obpData, setobpData] = useState(barPlaceholderData);
 
     function handleOnChange(e){
         var event = e.target.value;
@@ -41,6 +40,7 @@ function Home(props) {
         }
         props.setWordCount(validWords);
     }
+
     function sec2time(timeInSeconds) {
         var pad = function(num, size) { return ('000' + num).slice(size * -1); },
         time = parseFloat(timeInSeconds).toFixed(3),
@@ -50,6 +50,41 @@ function Home(props) {
     
         return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
     }
+
+    function mapOccOverTime(occurrencesOverTime){
+        const ootMap = new Map();
+        
+        for(const element of occurrencesOverTime){
+            let strDate = element.date;
+            let occ = element.num_of_occurences;
+            const dt = new Date(strDate);
+            if(ootMap.has(dt.getFullYear())){
+                let tmp = ootMap.get(dt.getFullYear());
+                tmp += occ;
+                ootMap.set(dt.getFullYear(), tmp);
+            }
+            else{
+                ootMap.set(dt.getFullYear(), occ);
+            }
+        }
+        let ootLabels = [];
+        let ootData = [];
+        for(const element of ootMap){
+            ootLabels.push(element[0]);
+            ootData.push(element[1]);
+        }
+        setootData({
+            labels: ootLabels,
+            datasets: [{
+                label: "Num Occurences",
+                data: ootData,
+                fill: true,
+                backgroundColor: "DarkOliveGreen",}
+            ]
+        })
+        
+    }
+
     async function textareaAPI(){
 
         let data = {
@@ -66,11 +101,15 @@ function Home(props) {
         .then(data => {
             let time = sec2time(data.timeInSeconds)
             props.setSpeechLength(time);
-          console.log('Success:', data);
+          //console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
         });;
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async function oneWordAPI(){
@@ -89,16 +128,16 @@ function Home(props) {
             body: JSON.stringify(data)
         }).then(response => response.json())
         .then(data => {
-            console.log(data.id);
+            //console.log(data.id);
             wordId = data.id;
             // console.log(wordId);
-            console.log('Success:', data);
+            //console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
         });;
 
-        fetch(ID_INFO_URL, {
+        await fetch(ID_INFO_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -109,9 +148,10 @@ function Home(props) {
             setSearchTextLength(data.avg_time);
             setTotalOccurrences(data.total_occurences);
             setVariance(data.variance);
-            setOccurrencesOverTime(data.occurences_over_time);
+
+            mapOccOverTime(data.occurences_over_time);
             setOccurrencesByPercentage(data.occurences_by_percentage);
-            console.log('Success:', data);
+            //console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -180,7 +220,7 @@ function Home(props) {
                     <Card.Header as="h5">Occurrences Over Time</Card.Header>
                     <Card.Body>
                         <Bar
-                            data={barPlaceholderData}
+                            data={ootData}
                             options={{
                                 responsive: true
                             }}
@@ -190,8 +230,8 @@ function Home(props) {
                 <Card>
                     <Card.Header as="h5">Occurrences By Percentage</Card.Header>
                     <Card.Body>
-                        <Scatter
-                            data={scatterPlaceholderData}
+                        <Bar
+                            data={ootData}
                             options={{
                                 responsive: true
                             }}

@@ -203,7 +203,7 @@ function Home(props) {
                                 Search
                             </Button>
                         </InputGroup>
-                        Average speaking time for {searchText}: {searchTextLength} <br/>
+                        Average speaking time: {searchTextLength} <br/>
                         Total Occurrences: {totalOccurrences}<br/>
                         Variance: {variance}
                         </Card.Body>
@@ -222,33 +222,6 @@ function Home(props) {
                         />
                     </Card.Body>
                 </Card>
-                {/* <Card>
-                    <Card.Header as="h5">Most Common Words</Card.Header>
-                    <Card.Body>
-                        <Doughnut
-                            data={{
-                                labels: [
-                                    'Red',
-                                    'Blue',
-                                    'Yellow'
-                                  ],
-                                  datasets: [{
-                                    label: 'My First Dataset',
-                                    data: [300, 50, 100],
-                                    backgroundColor: [
-                                      'rgb(255, 99, 132)',
-                                      'rgb(54, 162, 235)',
-                                      'rgb(255, 205, 86)'
-                                    ],
-                                    hoverOffset: 4
-                                  }]
-                            }}
-                            options={{
-                                responsive: true
-                            }}
-                        />
-                    </Card.Body>
-                </Card> */}
                 <Card>
                     <Card.Header as="h5">Occurrences By Percentage</Card.Header>
                     <Card.Body>

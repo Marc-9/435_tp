@@ -33,9 +33,9 @@ async function getLength(speech){
         word_time[row.word] = time
     }
     //console.log(word_time);
-    let periodCount = speech.match(/\./g).length;
+    let periodCount = speech.match(/\./g) ? speech.match(/\./g).length : 0;
     let periodTime = periodCount*0.5; //TODO - replace with actual measurements
-    let commaCount = speech.match(/,/g).length;
+    let commaCount = speech.match(/,/g) ? speech.match(/,/g).length : 0;
     let commaTime = commaCount*0.5; //TODO - replace with actual measurements
 
     let totalTime = periodTime + commaTime;

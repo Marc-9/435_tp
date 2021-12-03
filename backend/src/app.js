@@ -4,7 +4,7 @@ const db = require('./db.js')
 
 const app = express()
 app.use(bodyParser.json()) 
-const port = 3000
+const port = 3030
 
 app.get('/', (req, res) => {
     res.send('hi from root path!');
@@ -16,9 +16,9 @@ async function getLength(speech){
     }
     var speechWords = speech.match(/\w+/g);
     var speechLength = speechWords.length;
-    var query = `SELECT id, word, avg_length, variance FROM words WHERE word="${speechWords[0]}"`
+    var query = `SELECT id, word, avg_length, variance FROM words WHERE word=${db.pool.escape(speechWords[0])}`
     for(word of speechWords){
-        query += ` OR word = "${word}"`;
+        query += ` OR word = "${db.pool.escape(word)}"`;
     }
     result = await db.execute_query(query);
     
@@ -40,7 +40,7 @@ app.post('/speech_time', async (req, res) => {
 
 app.post('/search_word', async (req, res) => {
     var word = req.body.word;
-    var words = await db.execute_query(`SELECT id, word FROM words WHERE word LIKE "%${word}%"`);
+    var words = await db.execute_query(`SELECT id, word FROM words WHERE word LIKE "${db.pool.escape(word)}%"`);
     var response = {
         'words': words,
     };
@@ -50,11 +50,11 @@ app.post('/search_word', async (req, res) => {
 app.post('/word_info', async (req, res) => {
     var id = req.body.id;
 
-    var word_row = await db.execute_query(`select * from words where id = ${id}`)
+    var word_row = await db.execute_query(`select * from words where id = ${db.pool.escape(id)}`)
     word_row = word_row[0];
-    var date_occ = await db.execute_query(`select date, num_of_occurences FROM word_date WHERE word_id = ${id}`)
+    var date_occ = await db.execute_query(`select date, num_of_occurences FROM word_date WHERE word_id = ${db.pool.escape(id)}`)
     
-    var perc_occ = await db.execute_query(`select percent, num_of_occurences FROM word_percent WHERE word_id = ${id}`)
+    var perc_occ = await db.execute_query(`select percent, num_of_occurences FROM word_percent WHERE word_id = ${db.pool.escape(id)}`)
 
     var response = {
         'total_occurences': word_row.num_occurences_tot,
@@ -66,6 +66,11 @@ app.post('/word_info', async (req, res) => {
 })
 
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+process = app.listen(port, () => {
+  console.log(`Backend listening at http://localhost:${port}`)
+})
+
+process.on('SIGTERM', () => {
+    debug('SIGTERM signal received: closing HTTP server');
+    pool.end();
 })

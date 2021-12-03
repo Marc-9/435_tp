@@ -38,6 +38,29 @@ app.post('/speech_time', async (req, res) => {
     res.json(response);
 })
 
+app.post('/search_word', async (req, res) => {
+    var word = req.body.word;
+    var words = await db.execute_query(`SELECT id, word FROM words WHERE word LIKE "%${word}%"`);
+    var response = {
+        'words': words,
+    };
+    res.json(response);
+})
+
+app.post('/word_info', async (req, res) => {
+    var id = req.body.id;
+    `select * from words where id = ${id}`
+
+    select date, num_of_occurrences FROM word_date WHERE word_id = [input_id]
+
+    select percent, num_of_occurrences FROM word_percent WHERE word_Id = [input_id]
+
+    var words = await db.execute_query(`SELECT id, word FROM words WHERE word LIKE "%${word}%"`);
+    var response = {
+        'words': words,
+    };
+    res.json(response);
+})
 
 
 app.listen(port, () => {

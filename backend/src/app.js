@@ -49,15 +49,18 @@ app.post('/search_word', async (req, res) => {
 
 app.post('/word_info', async (req, res) => {
     var id = req.body.id;
-    `select * from words where id = ${id}`
 
-    select date, num_of_occurrences FROM word_date WHERE word_id = [input_id]
+    var word_row = await db.execute_query(`select * from words where id = ${id}`)
+    word_row = word_row[0];
+    var date_occ = await db.execute_query(`select date, num_of_occurences FROM word_date WHERE word_id = ${id}`)
+    
+    var perc_occ = await db.execute_query(`select percent, num_of_occurences FROM word_percent WHERE word_id = ${id}`)
 
-    select percent, num_of_occurrences FROM word_percent WHERE word_Id = [input_id]
-
-    var words = await db.execute_query(`SELECT id, word FROM words WHERE word LIKE "%${word}%"`);
     var response = {
-        'words': words,
+        'total_occurences': word_row.num_occurences_tot,
+        'occurences_over_time': date_occ,
+        'occurences_by_percentage': perc_occ,
+        'variance': word_row.variance
     };
     res.json(response);
 })

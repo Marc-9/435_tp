@@ -3,7 +3,7 @@ run `source ./run_db.sh`
 
 Using this library in nodeJS: node-mysql2
 
-login with ` mysql -u root -p` with password 12345
+login with ` mysql -u root -p`
 
 RUN `CREATE DATABASE SpeechTimer`
 

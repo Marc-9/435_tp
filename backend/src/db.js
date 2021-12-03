@@ -11,7 +11,7 @@ var pool = mysql.createPool({
 function execute_query(query){
     return new Promise(resolve =>  {
         try{   
-              console.log(query);
+              //console.log(query);
               pool.query(query, function (error, results, fields) {
                     if (error) throw error;
                     //console.log(results);

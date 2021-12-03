@@ -17,18 +17,30 @@ async function getLength(speech){
         return 0;
     }
     let speechWords = speech.match(/\w+/g);
-    let speechLength = speechWords.length;
-    let query = `SELECT * FROM words WHERE word=${db.pool.escape(speechWords[0])}`
+
+    let query = `SELECT * FROM words WHERE word=${db.pool.escape(speechWords[0].toLowerCase())}`
     for(word of speechWords){
-        query += ` OR word = "${db.pool.escape(word)}"`;
+        query += ` OR word = ${db.pool.escape(word.toLowerCase())}`;
     }
     result = await db.execute_query(query);
     
-    let totalTime = 0;
+    word_time = {}
     for(row of result){
-        let time = row.avg_length;
-        totalTime += time;
+        let time = Number(row.avg_length);
+        word_time[row.word] = time
     }
+    //console.log(word_time);
+    let totalTime = 0;
+    for(word of speechWords){
+        let curTime = word_time[word];
+        if(!isNaN(curTime)){
+            totalTime += curTime;
+        }else{
+            //TODO add time based on length of the word.
+            totalTime += 0.5;
+        }
+    }
+    //console.log(totalTime);
     return totalTime;
 }
 app.post('/speech_time', async (req, res) => {
@@ -52,7 +64,6 @@ app.post('/search_word', async (req, res) => {
 app.post('/get_id', async (req, res) => {
     let word = req.body.word;
     let words = await db.execute_query(`SELECT id, word FROM words WHERE word = ${db.pool.escape(word)}`);
-    console.log(words);
     let id = word.length > 0 ? words[0].id : -1;
     let response = {
         'word': word,

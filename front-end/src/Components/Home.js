@@ -10,6 +10,9 @@ import faker from 'faker';
 
 
 const DELIMITERS = /\W+/;
+const SPEECH_TIME_URL = "http://localhost:3030/speech_time";
+const WORD_ID_URL = "http://localhost:3030/search_word";
+const ID_INFO_URL = "http://localhost:3030/word_info";
 
 function Home(props) {
 
@@ -37,13 +40,48 @@ function Home(props) {
         props.setWordCount(validWords);
     }
 
-    function textareaAPI(){
-        // send currentText to the API
-        console.log(currentText);
+    async function textareaAPI(){
+
+        let data = {
+            "speech": currentText
+        };
+
+        fetch(SPEECH_TIME_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+        .then(data => {
+            props.setSpeechLength(data.timeInSeconds);
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });;
     }
 
     function oneWordAPI(){
-        console.log(searchText);
+
+        let data = {
+            "word": searchText
+        };
+
+        fetch(WORD_ID_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+        .then(data => {
+            // props.setSpeechLength(data.timeInSeconds);
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });;
     }
 
     return (

@@ -1,10 +1,12 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const db = require('./db.js')
 
 const app = express()
 app.use(bodyParser.json()) 
-const port = 3000
+app.use(cors())
+const port = 3030
 
 app.get('/', (req, res) => {
     res.send('hi from root path!');
@@ -30,6 +32,7 @@ async function getLength(speech){
     return time;
 }
 app.post('/speech_time', async (req, res) => {
+    console.log(req.body);
     var speech = req.body.speech;
     var speechLength = await getLength(speech);
     var response = {

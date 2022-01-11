@@ -4,15 +4,17 @@ import { Badge, Card, Button, InputGroup, FormControl } from 'react-bootstrap';
 // eslint-disable-next-line
 import Chart from 'chart.js/auto';
 // eslint-disable-next-line
-import { Bar } from 'react-chartjs-2'
+import { Line, Bar, Scatter, Doughnut } from 'react-chartjs-2'
 // eslint-disable-next-line
+import faker from 'faker';
 import { darkMode, barPlaceholderData } from '../Constants/Constants';
 
 
 const DELIMITERS = /\W+/;
-const SPEECH_TIME_URL = "http://localhost:3030/speech_time";
-const WORD_ID_URL = "http://localhost:3030/get_id";
-const ID_INFO_URL = "http://localhost:3030/word_info";
+const SPEECH_TIME_URL = "https://speech-timer.com/api/speech_time";
+const WORD_ID_URL = "https://speech-timer.com/api/get_id";
+// eslint-disable-next-line
+const ID_INFO_URL = "https://speech-timer.com/api/word_info";
 
 function Home(props) {
 
@@ -22,10 +24,18 @@ function Home(props) {
     const[searchTextLength, setSearchTextLength] = useState(0);
     // const[wordId, setWordId] = useState(0);
     const[totalOccurrences, setTotalOccurrences] = useState(0);
+    const[occurrencesOverTime, setOccurrencesOverTime] = useState([]);
+    const[occurrencesByPercentage, setOccurrencesByPercentage] = useState([]);
     const[variance, setVariance] = useState(0);
     const[ootData, setootData] = useState(barPlaceholderData);
     const[obpData, setobpData] = useState(barPlaceholderData);
     const[varTime, setVarTime] = useState(0);
+
+    let darkMode = {
+        color: '#fff', 
+        fontSize: '40px', 
+        fontWeight: '400',
+    }
 
     function handleOnChange(e){
         var event = e.target.value;
@@ -40,7 +50,6 @@ function Home(props) {
         }
         props.setWordCount(validWords);
     }
-
     function sec2time(timeInSeconds) {
         var pad = function(num, size) { return ('000' + num).slice(size * -1); },
         time = parseFloat(timeInSeconds).toFixed(3),
@@ -50,7 +59,6 @@ function Home(props) {
     
         return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
     }
-
     function mapPerOverTime(occurrencesByPercentage){
         let obpMap = [];
 
@@ -68,7 +76,7 @@ function Home(props) {
             obpLabels.push(element[0]);
             obpData.push(element[1]);
         }
-        
+
         setobpData({
             labels: obpLabels,
             datasets: [{
@@ -82,7 +90,7 @@ function Home(props) {
 
     function mapOccOverTime(occurrencesOverTime){
         let ootMap = new Map();
-        
+
         for(const element of occurrencesOverTime){
             let strDate = element.date;
             let occ = element.num_of_occurences;
@@ -112,9 +120,8 @@ function Home(props) {
                 backgroundColor: "DarkOliveGreen",}
             ]
         })
-        
-    }
 
+    }
     async function textareaAPI(){
 
         let data = {
@@ -133,7 +140,7 @@ function Home(props) {
             let varTime = sec2time(data.varianceInSeconds);
             setVarTime(varTime);
             props.setSpeechLength(time);
-        //   console.log('Success:', data);
+          console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -156,7 +163,7 @@ function Home(props) {
             body: JSON.stringify(data)
         }).then(response => response.json())
         .then(data => {
-            //console.log(data.id);
+            console.log(data.id);
             wordId = data.id;
             // console.log(wordId);
             console.log('Success:', data);
@@ -183,7 +190,10 @@ function Home(props) {
         .catch((error) => {
           console.error('Error:', error);
         });;
+        
     }
+
+    console.log(occurrencesByPercentage);
 
     return (
         <div className="main" id="main">

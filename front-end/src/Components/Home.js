@@ -11,10 +11,10 @@ import { darkMode, barPlaceholderData } from '../Constants/Constants';
 
 
 const DELIMITERS = /\W+/;
-const SPEECH_TIME_URL = "https://speech-timer.com/api/speech_time";
-const WORD_ID_URL = "https://speech-timer.com/api/get_id";
+const SPEECH_TIME_URL = "http://localhost/api/speech_time";
+const WORD_ID_URL = "http://localhost/api/get_id";
 // eslint-disable-next-line
-const ID_INFO_URL = "https://speech-timer.com/api/word_info";
+const ID_INFO_URL = "http://localhost/api/word_info";
 
 function Home(props) {
 

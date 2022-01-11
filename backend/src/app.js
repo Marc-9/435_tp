@@ -1,6 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+var converter = require('number-to-words');
+
 const db = require('./db.js')
 
 const app = express()
@@ -16,6 +18,7 @@ async function getLength(speech){
     if(speech.length == 0){
         return 0;
     }
+
     let speechWords = speech.match(/\w+/g);
 
     let query = `SELECT * FROM words WHERE word=${db.pool.escape(speechWords[0].toLowerCase())}`
@@ -24,32 +27,76 @@ async function getLength(speech){
     }
     result = await db.execute_query(query);
     
-    word_time = {}
+    word_time = {};
+    word_var = {};
+    word_avg = {};
     for(row of result){
         let time = Number(row.avg_length);
-        word_time[row.word] = time
+        word_time[row.word] = time;
+        word_var[row.word] = Number(row.variance);
     }
     //console.log(word_time);
-    let totalTime = 0;
+    let periodCount = speech.match(/\./g) ? speech.match(/\./g).length : 0;
+    let periodTime = periodCount*0.5; //TODO - replace with actual measurements
+    let commaCount = speech.match(/,/g) ? speech.match(/,/g).length : 0;
+    let commaTime = commaCount*0.5; //TODO - replace with actual measurements
+
+    let totalTime = periodTime + commaTime;
+    let totalVariance = 0;
     let unknown_words = 0;
+
     for(word of speechWords){
+        word = word.toLowerCase();
         let curTime = word_time[word];
         if(!isNaN(curTime)){
             totalTime += curTime;
+            if(word_var[word] > word_time[word]){
+                console.log(word + ' bad var');
+                totalVariance += 0.05;
+            }else{
+                totalVariance += word_var[word];
+            }
         }else{
             //TODO add time based on length of the word.
-            unknown_words += 1;
-            totalTime += 0.1*word.length;
+            //console.log(word)
+            let numWord = false;
+            if(!isNaN(word)){ //check if current word is a number
+                let newWords = converter.toWords(word).replace(/,/g, '').replace(/-/, ' ').split(/ /g);
+                //console.log('converted: ' + newWords);
+                
+                for(num of newWords){
+                    num = num.toLowerCase();
+                    let curTime = word_time[num];
+                    if(!isNaN(curTime)){
+                        totalTime += curTime;
+                        if(word_var[num] > word_time[num]){
+                            totalVariance += 0.05;
+                        }else{
+                            totalVariance += word_var[num];
+                        }
+                    }else{
+                        console.log(num);
+                        unknown_words += 1;
+                        totalTime += 0.05*word.length;
+                    }
+                }
+            }else{
+                console.log(word);
+                unknown_words += 1;
+                totalTime += 0.05*word.length;
+            }
         }
     }
     console.log(`unknown words: ${unknown_words}`);
-    return totalTime;
+    return [totalTime, totalVariance];
 }
 app.post('/speech_time', async (req, res) => {
     let speech = req.body.speech;
-    let speechLength = await getLength(speech);
+    let result = await getLength(speech);
+    console.log(result);
     let response = {
-        'timeInSeconds': speechLength,
+        'timeInSeconds': result[0],
+        'varianceInSeconds': result[1] 
     };
     res.json(response);
 })
@@ -66,7 +113,7 @@ app.post('/search_word', async (req, res) => {
 app.post('/get_id', async (req, res) => {
     let word = req.body.word;
     let words = await db.execute_query(`SELECT id, word FROM words WHERE word = ${db.pool.escape(word)}`);
-    let id = word.length > 0 ? words[0].id : -1;
+    let id = words.length > 0 ? words[0].id : -1;
     let response = {
         'word': word,
         'id': id,
@@ -83,6 +130,7 @@ app.post('/word_info', async (req, res) => {
     }else{
         word_row = {
             'word': '',
+            'avg_time': 0,
             'num_occurences_tot': 0,
             'variance': 0
         }
@@ -94,6 +142,7 @@ app.post('/word_info', async (req, res) => {
 
     let response = {
         'word': word_row.word,
+        'avg_time': word_row.avg_length,
         'total_occurences': word_row.num_occurences_tot,
         'occurences_over_time': date_occ,
         'occurences_by_percentage': perc_occ,

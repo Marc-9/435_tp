@@ -77,7 +77,7 @@ function Home(props) {
 
         for(const element of occurrencesOverTime){
             let strDate = element.date;
-            let occ = element.num_of_occurences;
+            let occ = parseInt(element.num_of_occurences,10);
             const dt = new Date(strDate);
             if(ootMap.has(dt.getFullYear())){
                 let tmp = ootMap.get(dt.getFullYear());
@@ -88,6 +88,7 @@ function Home(props) {
                 ootMap.set(dt.getFullYear(), occ);
             }
         }
+        console.log(ootMap);
         let ootLabels = [];
         let ootData = [];
         ootMap = new Map([...ootMap.entries()].sort());

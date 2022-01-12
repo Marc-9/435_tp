@@ -79,7 +79,7 @@ if($_GET['url'] == 'get_id'){
 }
 
 if($_GET['url'] == 'word_info'){
-    $response = ["avg_time" => null, "total_occurences" => null, "variance" => null, "occurences_over_time" => null, "occurences_by_percentage" => null];
+    $response = ["avg_time" => null, "total_occurences" => null, "variance" => null, "occurences_over_time" => [], "occurences_by_percentage" => []];
     $json = json_decode(file_get_contents('php://input'), true);
     $word_id = $json['id'] ?? null;
     $stmt = $speechdb->prepare("SELECT * FROM words WHERE id = ?");
@@ -91,6 +91,14 @@ if($_GET['url'] == 'word_info'){
         $response['avg_time'] = $result['avg_length'];
         $response['total_occurences'] = $result['num_occurences_tot'];
         $response['variance'] = $result['variance'];
+
+        $word_date = $speechdb->query("SELECT * from word_date WHERE word_id = $response[id]");
+        while($date = $word_date->fetch_assoc()){
+            $temp = ["date" => $date['date'], "num_of_occurences"=> $date['num_of_occurences']];
+            array_push($response['occurences_over_time'], $temp);
+        }
+
+
         echo json_encode($response);
     }
 }

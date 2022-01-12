@@ -64,6 +64,7 @@ if($_GET['url'] == 'speech_time'){
 }
 
 if($_GET['url'] == 'get_id'){
+
     $response = ["id" => null];
     $json = json_decode(file_get_contents('php://input'), true);
     $word = $json['word'] ?? null;
@@ -72,8 +73,10 @@ if($_GET['url'] == 'get_id'){
     if(!$stmt->execute()){
         echo json_encode($response);
     }else{
-        $result = $stmt->get_result();
-        $response['id'] = $result->fetch_assoc()['id'];
+        $result = $stmt->get_result()->fetch_assoc();
+        if(isset($result['id'])){
+            $response['id'] = $result['id'];
+        }
         echo json_encode($response);
     }
 }
@@ -84,18 +87,21 @@ if($_GET['url'] == 'word_info'){
     $word_id = $json['id'] ?? null;
     $stmt = $speechdb->prepare("SELECT * FROM words WHERE id = ?");
     $stmt->bind_param("i", $word_id);
+
     if(!$stmt->execute()){
         echo json_encode($response);
     }else{
         $result = $stmt->get_result()->fetch_assoc();
-        $response['avg_time'] = $result['avg_length'];
-        $response['total_occurences'] = $result['num_occurences_tot'];
-        $response['variance'] = $result['variance'];
+        if(isset($result['avg_length']) && isset($result['num_occurences_tot']) && isset($result['variance']) && isset($result['id'])) {
+            $response['avg_time'] = $result['avg_length'];
+            $response['total_occurences'] = $result['num_occurences_tot'];
+            $response['variance'] = $result['variance'];
 
-        $word_date = $speechdb->query("SELECT * from word_date WHERE word_id = $response[id]");
-        while($date = $word_date->fetch_assoc()){
-            $temp = ["date" => $date['date'], "num_of_occurences"=> $date['num_of_occurences']];
-            array_push($response['occurences_over_time'], $temp);
+            $word_date = $speechdb->query("SELECT * from word_date WHERE word_id = $result[id]");
+            while($date = $word_date->fetch_assoc()){
+                $temp = ["date" => $date['date'], "num_of_occurences"=> $date['num_of_occurences']];
+                array_push($response['occurences_over_time'], $temp);
+            }
         }
 
 

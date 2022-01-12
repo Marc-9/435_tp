@@ -1,7 +1,13 @@
 import React, { useState } from 'react'
-import { Card, Button, InputGroup, FormControl } from 'react-bootstrap';
+// eslint-disable-next-line
+import { Badge, Card, Button, InputGroup, FormControl } from 'react-bootstrap';
+// eslint-disable-next-line
+import Chart from 'chart.js/auto';
+// eslint-disable-next-line
 import { Bar } from 'react-chartjs-2'
+// eslint-disable-next-line
 import { darkMode, barPlaceholderData } from '../Constants/Constants';
+
 
 
 const DELIMITERS = /\W+/;
@@ -36,11 +42,11 @@ function Home(props) {
     }
     function sec2time(timeInSeconds) {
         var pad = function(num, size) { return ('000' + num).slice(size * -1); },
-        time = parseFloat(timeInSeconds).toFixed(3),
-        hours = Math.floor(time / 60 / 60),
-        minutes = Math.floor(time / 60) % 60,
-        seconds = Math.floor(time - minutes * 60);
-    
+            time = parseFloat(timeInSeconds).toFixed(3),
+            hours = Math.floor(time / 60 / 60),
+            minutes = Math.floor(time / 60) % 60,
+            seconds = Math.floor(time - minutes * 60);
+
         return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
     }
     function mapPerOverTime(occurrencesByPercentage){
@@ -73,12 +79,23 @@ function Home(props) {
     }
 
     function mapOccOverTime(occurrencesOverTime){
+        let normalize = {'2012': 0.001,
+            '2013': 0.001,
+            '2014': 0.002,
+            '2015': 0.007,
+            '2016': 0.021,
+            '2017': 0.041,
+            '2018': 0.146,
+            '2019': 0.572,
+            '2020': 0.213}
         let ootMap = new Map();
 
         for(const element of occurrencesOverTime){
             let strDate = element.date;
-            let occ = parseInt(element.num_of_occurences,10);
+            let occur = parseInt(element.num_of_occurences,10);
+
             const dt = new Date(strDate);
+            let occ = occur / normalize[dt.getFullYear()]
             if(ootMap.has(dt.getFullYear())){
                 let tmp = ootMap.get(dt.getFullYear());
                 tmp += occ;
@@ -88,10 +105,11 @@ function Home(props) {
                 ootMap.set(dt.getFullYear(), occ);
             }
         }
-        console.log(ootMap);
+
         let ootLabels = [];
         let ootData = [];
         ootMap = new Map([...ootMap.entries()].sort());
+        console.log(ootMap);
         for(const element of ootMap){
             ootLabels.push(element[0]);
             ootData.push(element[1]);
@@ -117,18 +135,18 @@ function Home(props) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-              },
+            },
             body: JSON.stringify(data)
         }).then(response => response.json())
-        .then(data => {
-            let time = sec2time(data.timeInSeconds)
-            let varTime = sec2time(data.varianceInSeconds);
-            setVarTime(varTime);
-            props.setSpeechLength(time);
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });;
+            .then(data => {
+                let time = sec2time(data.timeInSeconds)
+                let varTime = sec2time(data.varianceInSeconds);
+                setVarTime(varTime);
+                props.setSpeechLength(time);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });;
     }
 
     async function oneWordAPI(){
@@ -142,34 +160,34 @@ function Home(props) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-              },
+            },
             body: JSON.stringify(data)
         }).then(response => response.json())
-        .then(data => {
-            wordId = data.id;
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });;
+            .then(data => {
+                wordId = data.id;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });;
 
         await fetch(ID_INFO_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-             },
+            },
             body: JSON.stringify({"id": wordId})
         }).then(response => response.json())
-        .then(data => {
-            setSearchTextLength(data.avg_time);
-            setTotalOccurrences(data.total_occurences);
-            setVariance(data.variance);
-            mapOccOverTime(data.occurences_over_time);
-            mapPerOverTime(data.occurences_by_percentage);
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });;
-        
+            .then(data => {
+                setSearchTextLength(data.avg_time);
+                setTotalOccurrences(data.total_occurences);
+                setVariance(data.variance);
+                mapOccOverTime(data.occurences_over_time);
+                mapPerOverTime(data.occurences_by_percentage);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });;
+
     }
 
 
@@ -212,20 +230,20 @@ function Home(props) {
                     <Card>
                         <Card.Header as="h5">Find statistics for one word</Card.Header>
                         <Card.Body>
-                        <InputGroup className="mb-3">
-                            <FormControl
-                                placeholder="type/paste word..."
-                                aria-label="Recipient's username"
-                                aria-describedby="basic-addon2"
-                                onChange={(e) => setSearchText(e.target.value)}
-                            />
-                            <Button variant="dark" id="button-addon2" onClick={(e) => oneWordAPI(searchText)}>
-                                Search
-                            </Button>
-                        </InputGroup>
-                        Average speaking time: {searchTextLength} <br/>
-                        Total Occurrences: {totalOccurrences}<br/>
-                        Variance: {variance}
+                            <InputGroup className="mb-3">
+                                <FormControl
+                                    placeholder="type/paste word..."
+                                    aria-label="Recipient's username"
+                                    aria-describedby="basic-addon2"
+                                    onChange={(e) => setSearchText(e.target.value)}
+                                />
+                                <Button variant="dark" id="button-addon2" onClick={(e) => oneWordAPI(searchText)}>
+                                    Search
+                                </Button>
+                            </InputGroup>
+                            Average speaking time: {searchTextLength} <br/>
+                            Total Occurrences: {totalOccurrences}<br/>
+                            Variance: {variance}
                         </Card.Body>
                     </Card>
                 </div>

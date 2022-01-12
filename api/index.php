@@ -102,6 +102,13 @@ if($_GET['url'] == 'word_info'){
                 $temp = ["date" => $date['date'], "num_of_occurences"=> $date['num_of_occurences']];
                 array_push($response['occurences_over_time'], $temp);
             }
+
+            $word_percentage = $speechdb->query("SELECT * from word_percent WHERE word_id = $result[id]");
+            while($date = $word_percentage->fetch_assoc()){
+                $temp = ["percent" => $date['percent'], "num_of_occurences"=> $date['num_of_occurences']];
+                array_push($response['occurences_by_percentage'], $temp);
+            }
+
         }
 
 

@@ -1,41 +1,25 @@
 import React, { useState } from 'react'
-// eslint-disable-next-line
-import { Badge, Card, Button, InputGroup, FormControl } from 'react-bootstrap';
-// eslint-disable-next-line
-import Chart from 'chart.js/auto';
-// eslint-disable-next-line
-import { Line, Bar, Scatter, Doughnut } from 'react-chartjs-2'
-// eslint-disable-next-line
-import faker from 'faker';
+import { Card, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { Bar } from 'react-chartjs-2'
 import { darkMode, barPlaceholderData } from '../Constants/Constants';
 
 
 const DELIMITERS = /\W+/;
 const SPEECH_TIME_URL = "http://localhost/api/speech_time";
 const WORD_ID_URL = "http://localhost/api/get_id";
-// eslint-disable-next-line
 const ID_INFO_URL = "http://localhost/api/word_info";
 
 function Home(props) {
 
-    // eslint-disable-next-line
     const[currentText, setCurrentText] = useState("");
     const[searchText, setSearchText] = useState("");
     const[searchTextLength, setSearchTextLength] = useState(0);
-    // const[wordId, setWordId] = useState(0);
     const[totalOccurrences, setTotalOccurrences] = useState(0);
-    const[occurrencesOverTime, setOccurrencesOverTime] = useState([]);
-    const[occurrencesByPercentage, setOccurrencesByPercentage] = useState([]);
     const[variance, setVariance] = useState(0);
     const[ootData, setootData] = useState(barPlaceholderData);
     const[obpData, setobpData] = useState(barPlaceholderData);
     const[varTime, setVarTime] = useState(0);
 
-    let darkMode = {
-        color: '#fff', 
-        fontSize: '40px', 
-        fontWeight: '400',
-    }
 
     function handleOnChange(e){
         var event = e.target.value;
@@ -147,7 +131,6 @@ function Home(props) {
     }
 
     async function oneWordAPI(){
-
         let wordId = 0;
 
         let data = {

@@ -140,7 +140,6 @@ function Home(props) {
             let varTime = sec2time(data.varianceInSeconds);
             setVarTime(varTime);
             props.setSpeechLength(time);
-          console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -163,10 +162,7 @@ function Home(props) {
             body: JSON.stringify(data)
         }).then(response => response.json())
         .then(data => {
-            console.log(data.id);
             wordId = data.id;
-            // console.log(wordId);
-            console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -185,7 +181,6 @@ function Home(props) {
             setVariance(data.variance);
             mapOccOverTime(data.occurences_over_time);
             mapPerOverTime(data.occurences_by_percentage);
-            console.log('Success:', data);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -193,7 +188,6 @@ function Home(props) {
         
     }
 
-    console.log(occurrencesByPercentage);
 
     return (
         <div className="main" id="main">

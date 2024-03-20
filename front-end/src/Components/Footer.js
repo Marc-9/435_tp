@@ -7,7 +7,7 @@ function Footer() {
         <div className="footer">
             <div>
                 <p className="text-center">CS435 Term Project - Fall 2021</p>
-                <p className="text-center"> Created by: JeanMarc Ruffalo-Burgat, Joe Riva, and Emmet Pritchard</p>
+                <p className="text-center"> Created by: JeanMarc Ruffalo-Burgat, Joe Riva, and Emmet</p>
             </div>
         </div>
     )

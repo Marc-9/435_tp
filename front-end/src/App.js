@@ -18,7 +18,7 @@ function App() {
   return (
     <>
       <Header
-        title="Speech Timer"
+        title="Test Test"
         about="About Us"
       />
       <Home
